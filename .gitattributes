@@ -1,0 +1,6 @@
+# Shell scripts must keep LF endings -- CRLF breaks the shebang line.
+*.sh text eol=lf
+
+# Plain text files, normalized in the repo.
+*.md text
+.gitignore text
