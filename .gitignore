@@ -1,0 +1,8 @@
+# Local scratch files
+*.log
+tmp/
+
+# OS cruft
+.DS_Store
+Thumbs.db
+desktop.ini
