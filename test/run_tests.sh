@@ -47,6 +47,25 @@ assert_eq "output is sorted by name" \
 Zaid,1.00" \
   "$($HOURS "$tmp/order.csv")"
 
+# --- blank lines are ignored ---------------------------------------------
+printf 'name,hours\nAmina,2.5\n\nRashid,1\n' > "$tmp/blank.csv"
+assert_eq "blank lines do not create a phantom row" \
+  "Amina,2.50
+Rashid,1.00" \
+  "$($HOURS "$tmp/blank.csv")"
+
+# --- surrounding whitespace is trimmed -----------------------------------
+printf 'name,hours\nAmina,2.5\n Amina ,0.5\n' > "$tmp/padded.csv"
+assert_eq "padded names count as the same person" \
+  "Amina,3.00" \
+  "$($HOURS "$tmp/padded.csv")"
+
+# --- CRLF input is tolerated ---------------------------------------------
+printf 'name,hours\r\nAmina,2.5\r\nAmina,0.5\r\n' > "$tmp/crlf.csv"
+assert_eq "CRLF line endings are handled" \
+  "Amina,3.00" \
+  "$($HOURS "$tmp/crlf.csv")"
+
 # --- a missing file is an error ------------------------------------------
 $HOURS "$tmp/nope.csv" >/dev/null 2>&1
 assert_eq "missing file exits non-zero" "1" "$?"

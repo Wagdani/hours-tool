@@ -10,6 +10,9 @@
 #   Rashid,1
 #   Amina,0.5
 #
+# Blank lines are ignored, and surrounding whitespace is trimmed from
+# each field, so "Amina" and " Amina" count as the same person.
+#
 # Prints one "name,total" line per person, sorted by name.
 
 set -euo pipefail
@@ -26,9 +29,18 @@ main() {
     return 1
   fi
 
-  awk -F, 'NR > 1 { total[$1] += $2 }
-           END { for (name in total) printf "%s,%.2f\n", name, total[name] }' "$file" \
-    | sort
+  awk -F, '
+    NR == 1 { next }                       # skip the header row
+    { sub(/\r$/, "") }                     # tolerate CRLF input
+    /^[[:space:]]*$/ { next }              # skip blank lines
+    {
+      name = $1
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", name)
+      if (name == "") next                 # skip records with no name
+      total[name] += $2
+    }
+    END { for (name in total) printf "%s,%.2f\n", name, total[name] }
+  ' "$file" | sort
 }
 
 main "$@"
